@@ -3,7 +3,6 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from library_catalog.data.models.book import Book
 
 T = TypeVar('T')
 

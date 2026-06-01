@@ -1,5 +1,3 @@
-from typing import Type
-
 from sqlalchemy import select, func
 
 from library_catalog.core.database import AsyncSession
