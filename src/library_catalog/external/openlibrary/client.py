@@ -1,4 +1,3 @@
-from fastapi import params
 import httpx
 
 from ..base.base_client import BaseApiClient
