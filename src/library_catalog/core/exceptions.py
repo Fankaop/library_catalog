@@ -20,6 +20,14 @@ class NotFoundException(AppException):
             status_code=404
         )
 
+class UnauthorizedException(AppException):
+    def __init__(self, message: str = 'Not auth'):
+        super().__init__(message, status_code=401)
+
+class ForbiddenException(AppException):
+    def __init__(self, message: str = 'Not enough permissions'):
+        super().__init__(message, status_code=403)
+
 def register_exception_handlers(app: FastAPI) -> None:
     """Зарегистрировать обработчики исключений."""
     
