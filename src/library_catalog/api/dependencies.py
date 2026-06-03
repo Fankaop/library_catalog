@@ -1,3 +1,4 @@
+import uuid
 from functools import lru_cache
 from typing import Annotated
 
@@ -10,6 +11,14 @@ from ..domain.services.book_service import BookService
 from ..external.openlibrary.client import OpenLibraryClient
 from ..core.config import settings
 
+#зависимости для jwt аутентификации
+from fastapi import Header
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from jose import JWTError
+from ..core.security import decode_token
+from ..core.exceptions import UnauthorizedException, ForbiddenException
+from ..data.models.user import UserRole, User
+from ..data.repositories.user_repository import UserRepository
 
 # ========== EXTERNAL CLIENTS (Singletons) ==========
 
@@ -67,3 +76,37 @@ async def get_book_service(
 BookServiceDep = Annotated[BookService, Depends(get_book_service)]
 BookRepoDep = Annotated[BookRepository, Depends(get_book_repository)]
 DbSessionDep = Annotated[AsyncSession, Depends(get_db)]
+
+
+# ========== JWT AUTH ==========
+bearer_scheme = HTTPBearer()
+
+async def get_user_repository(db: DbSessionDep) -> UserRepository:
+    return UserRepository(db)
+
+async def get_current_user(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
+    user_repo: Annotated[UserRepository, Depends(get_user_repository)],
+) -> User:
+    try:
+        payload = decode_token(credentials.credentials)
+    except JWTError:
+        raise UnauthorizedException("Invalid or expired token")
+    
+    user = await user_repo.get_by_id(uuid.UUID(payload["sub"]))
+    if not user or not user.is_active:
+        raise UnauthorizedException()
+    return user
+
+def require_role(*roles: UserRole):
+    """Фабрика зависимостей для проверки роли."""
+    async def checker(current_user: Annotated[User, Depends(get_current_user)]) -> User:
+        if current_user.role not in roles:
+            raise ForbiddenException()
+        return current_user
+    return checker
+
+
+# ========== TYPE ALIASES ==========
+CurrentUserDep = Annotated[User, Depends(get_current_user)]
+AdminDep = Annotated[User, Depends(require_role(UserRole.admin))]

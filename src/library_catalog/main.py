@@ -11,7 +11,7 @@ from .core.config import settings
 from .core.database import dispose_engine
 from .core.exceptions import register_exception_handlers
 from .core.logging_config import setup_logging
-from .api.v1.routers import books, health
+from .api.v1.routers import books, health, auth
 
 
 # ========== LIFECYCLE EVENTS ==========
@@ -71,6 +71,10 @@ app.include_router(
 )
 app.include_router(
     health.router,
+    prefix=settings.api_v1_prefix,
+)
+app.include_router(
+    auth.router,
     prefix=settings.api_v1_prefix,
 )
 

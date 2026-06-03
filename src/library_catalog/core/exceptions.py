@@ -28,6 +28,10 @@ class ForbiddenException(AppException):
     def __init__(self, message: str = 'Not enough permissions'):
         super().__init__(message, status_code=403)
 
+class ConflictException(AppException):
+    def __init__(self, message: str = 'Conflict'):
+        super().__init__(message, status_code=409)
+
 def register_exception_handlers(app: FastAPI) -> None:
     """Зарегистрировать обработчики исключений."""
     
