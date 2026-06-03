@@ -1,15 +1,20 @@
+import base64
+import hashlib
 from datetime import datetime, timedelta, timezone
+
+import bcrypt
 from jose import jwt, JWTError
-from passlib.context import CryptContext
 from .config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def _prepare(password: str) -> bytes:
+    # SHA-256 pre-hash avoids bcrypt's 72-byte limit
+    return base64.b64encode(hashlib.sha256(password.encode()).digest())
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(_prepare(password), bcrypt.gensalt()).decode()
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(_prepare(plain), hashed.encode())
 
 def create_access_token(sub: str, role: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)

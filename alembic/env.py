@@ -8,6 +8,7 @@ from alembic import context
 from src.library_catalog.core.config import settings
 from src.library_catalog.core.database import Base
 from src.library_catalog.data.models import book  # noqa: F401 — registers models
+from src.library_catalog.data.models import user  # noqa: F401
 
 config = context.config
 
