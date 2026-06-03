@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     database_pool_size: int = 20
     debug: bool = True
+    openlibrary_base_url: str = "https://openlibrary.org"
+    openlibrary_timeout: float = 10.0
+    docs_url: str = "/docs"
+    redoc_url: str = "/redoc"
+    cors_origins: list[str] = ["*"]
 
 
     model_config = SettingsConfigDict(

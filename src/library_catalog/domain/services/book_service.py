@@ -99,7 +99,7 @@ class BookService:
             self._validate_pages(book_data.pages)
         
         #обновляем
-        updated = self.book_repo.update(
+        updated = await self.book_repo.update(
             book_id,
             **book_data.dict(exclude_unset=True) #поля которые реально передали
         )
