@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from sqlalchemy import text
 
 from ..schemas.common import HealthCheckResponse

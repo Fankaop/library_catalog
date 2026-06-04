@@ -9,7 +9,7 @@ from ..schemas.book import (
     ShowBook,
 )
 from ..schemas.common import PaginatedResponse, PaginationParams
-from ...dependencies import BookServiceDep
+from ...dependencies import AdminDep, BookServiceDep, CurrentUserDep
 
 router = APIRouter(prefix="/books", tags=["Books"])
 
@@ -24,6 +24,7 @@ router = APIRouter(prefix="/books", tags=["Books"])
 async def create_book(
     book_data: BookCreate,
     service: BookServiceDep,
+    _current_user: CurrentUserDep,
 ):
     """
     Создать новую книгу.
@@ -113,6 +114,7 @@ async def update_book(
     book_id: UUID,
     book_data: BookUpdate,
     service: BookServiceDep,
+    _current_user: CurrentUserDep,
 ):
     """
     Обновить книгу.
@@ -139,6 +141,7 @@ async def update_book(
 async def delete_book(
     book_id: UUID,
     service: BookServiceDep,
+    _current_user: AdminDep,
 ):
     """
     Удалить книгу.

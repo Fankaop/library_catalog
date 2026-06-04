@@ -11,31 +11,25 @@ class BookBase(BaseModel):
     pages: int = Field(..., gt=0)
 
 
-class BookCreate(BookBase):
+class _ISBNValidatorMixin(BaseModel):
+    @field_validator("isbn", check_fields=False)
+    @classmethod
+    def validate_isbn(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        clean = v.replace("-", "").replace(" ", "")
+        if not clean.replace("X", "").isdigit():
+            raise ValueError("ISBN must contain only digits")
+        if len(clean) not in (10, 13):
+            raise ValueError("ISBN must be 10 or 13 digits")
+        return v
+
+
+class BookCreate(_ISBNValidatorMixin, BookBase):
     """Схема для создания книги."""
     isbn: str | None = Field(None, min_length=10, max_length=20)
     description: str | None = Field(None, max_length=5000)
-    
-    @field_validator("isbn")
-    @classmethod
-    def validate_isbn(cls, v: str | None) -> str | None:
-        """Валидация формата ISBN."""
-        if v is None:
-            return v
-        
-        # Удалить дефисы
-        clean = v.replace("-", "").replace(" ", "")
-        
-        # Проверить что только цифры (и X для ISBN-10)
-        if not clean.replace("X", "").isdigit():
-            raise ValueError("ISBN must contain only digits")
-        
-        # Проверить длину
-        if len(clean) not in (10, 13):
-            raise ValueError("ISBN must be 10 or 13 digits")
-        
-        return v
-    
+
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -53,7 +47,7 @@ class BookCreate(BookBase):
     }
 
 
-class BookUpdate(BaseModel):
+class BookUpdate(_ISBNValidatorMixin, BaseModel):
     """Схема для обновления книги (все поля опциональны)."""
     title: str | None = Field(None, min_length=1, max_length=500)
     author: str | None = Field(None, min_length=1, max_length=300)
@@ -61,7 +55,7 @@ class BookUpdate(BaseModel):
     genre: str | None = Field(None, min_length=1, max_length=100)
     pages: int | None = Field(None, gt=0)
     available: bool | None = None
-    isbn: str | None = None
+    isbn: str | None = Field(None, min_length=10, max_length=20)
     description: str | None = None
 
 

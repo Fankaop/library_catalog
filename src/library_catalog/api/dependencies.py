@@ -8,11 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..core.database import get_db
 from ..data.repositories.book_repository import BookRepository
 from ..domain.services.book_service import BookService
+from ..domain.services.auth_service import AuthService
 from ..external.openlibrary.client import OpenLibraryClient
 from ..core.config import settings
 
-#зависимости для jwt аутентификации
-from fastapi import Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError
 from ..core.security import decode_token
@@ -84,6 +83,12 @@ bearer_scheme = HTTPBearer()
 async def get_user_repository(db: DbSessionDep) -> UserRepository:
     return UserRepository(db)
 
+
+async def get_auth_service(
+    user_repo: Annotated[UserRepository, Depends(get_user_repository)],
+) -> AuthService:
+    return AuthService(user_repo)
+
 async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
     user_repo: Annotated[UserRepository, Depends(get_user_repository)],
@@ -110,3 +115,4 @@ def require_role(*roles: UserRole):
 # ========== TYPE ALIASES ==========
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
 AdminDep = Annotated[User, Depends(require_role(UserRole.admin))]
+AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]

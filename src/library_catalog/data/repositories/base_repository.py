@@ -3,7 +3,6 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-
 T = TypeVar('T')
 
 class BaseRepository(Generic[T]):

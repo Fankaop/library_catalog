@@ -1,8 +1,8 @@
 from sqlalchemy import select, func
 
-from library_catalog.core.database import AsyncSession
-from library_catalog.data.models.book import Book
-from library_catalog.data.repositories.base_repository import BaseRepository
+from sqlalchemy.ext.asyncio import AsyncSession
+from ...data.models.book import Book
+from ...data.repositories.base_repository import BaseRepository
 
 
 class BookRepository(BaseRepository[Book]):
@@ -28,8 +28,8 @@ class BookRepository(BaseRepository[Book]):
             query = query.where(Book.author.ilike(f'%{author}%'))
         
         if genre is not None:
-            query = query.where(Book.genre.ilike(f'%{genre}%'))
-        
+            query = query.where(Book.genre == genre)
+
         if year is not None:
             query = query.where(Book.year==year)
 
@@ -64,8 +64,8 @@ class BookRepository(BaseRepository[Book]):
             query = query.where(Book.author.ilike(f'%{author}%'))
         
         if genre is not None:
-            query = query.where(Book.genre.ilike(f'%{genre}%'))
-        
+            query = query.where(Book.genre == genre)
+
         if year is not None:
             query = query.where(Book.year==year)
 

@@ -41,10 +41,11 @@ class OpenLibraryException(AppException):
             status_code=503,
         )
 
-class OpenLibraryTimeoutException(AppException):
+class OpenLibraryTimeoutException(OpenLibraryException):
     """Внешний сервис Open Library не ответил за отведённое время. Возвращает 504 Gateway Timeout."""
     def __init__(self, timeout: float):
-        super().__init__(
+        AppException.__init__(
+            self,
             message=f'Open Library API timeout after {timeout}s',
             status_code=504,
         )

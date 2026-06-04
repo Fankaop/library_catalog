@@ -32,7 +32,7 @@ class Settings(BaseSettings):
         return self.environment == 'production'
 
 @lru_cache
-def get_settings() -> Settings:# -> Any:# -> Any:# -> Any:
+def get_settings() -> Settings:
     return Settings() # type: ignore
 
 settings = get_settings()

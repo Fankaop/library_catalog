@@ -1,0 +1,40 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "library-catalog"
+version = "0.1.0"
+description = "Library catalog API built with FastAPI and SQLAlchemy"
+packages = [{include = "library_catalog", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = ">=0.136.3"
+uvicorn = ">=0.48.0"
+sqlalchemy = ">=2.0.50"
+asyncpg = ">=0.31.0"
+alembic = ">=1.18.4"
+pydantic = ">=2.13.4"
+pydantic-settings = ">=2.14.1"
+python-jose = ">=3.5.0"
+bcrypt = ">=5.0.0"
+httpx = ">=0.28.1"
+python-dotenv = ">=1.2.2"
+email-validator = ">=2.3.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.4"
+pytest-asyncio = ">=0.23"
+pytest-mock = ">=3.12"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["src"]
+
+[tool.ruff]
+src = ["src"]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

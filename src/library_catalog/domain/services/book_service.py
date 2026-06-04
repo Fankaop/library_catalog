@@ -3,7 +3,13 @@ import logging
 from ...api.v1.schemas.book import BookCreate, BookUpdate, ShowBook
 from ...data.repositories.book_repository import BookRepository
 from ...external.openlibrary.client import OpenLibraryClient
-from ..exceptions import *
+from ..exceptions import (
+    BookNotFoundException,
+    BookAlreadyExistsException,
+    InvalidYearException,
+    InvalidPagesException,
+    OpenLibraryException,
+)
 from ..mappers.book_mapper import BookMapper
 
 class BookService:
@@ -43,9 +49,7 @@ class BookService:
 
         #2. проверка уникальности isbn
         if book_data.isbn:
-            existing = await self.book_repo.find_by_isbn(book_data.isbn)
-            if existing:
-                raise BookAlreadyExistsException(book_data.isbn)
+            await self._check_isbn_uniqueness(book_data.isbn)
         
         #3. Обогащение данных из Open Library
         extra = await self._enrich_book_data(book_data)
@@ -92,16 +96,18 @@ class BookService:
         if existing is None:
             raise BookNotFoundException(book_id)
         
-        #Валидация 
+        #Валидация
         if book_data.year is not None:
             self._validate_year(book_data.year)
         if book_data.pages is not None:
             self._validate_pages(book_data.pages)
-        
+        if book_data.isbn is not None:
+            await self._check_isbn_uniqueness(book_data.isbn, exclude_id=book_id)
+
         #обновляем
         updated = await self.book_repo.update(
             book_id,
-            **book_data.dict(exclude_unset=True) #поля которые реально передали
+            **book_data.model_dump(exclude_unset=True)
         )
 
         return BookMapper.to_show_book(updated) #type:ignore
@@ -161,6 +167,11 @@ class BookService:
 
  # ========== ПРИВАТНЫЕ МЕТОДЫ ==========
  
+    async def _check_isbn_uniqueness(self, isbn: str, exclude_id: UUID | None = None) -> None:
+        existing = await self.book_repo.find_by_isbn(isbn)
+        if existing and (exclude_id is None or existing.book_id != exclude_id):
+            raise BookAlreadyExistsException(isbn)
+
     def _validate_book_data(self, data: BookCreate) -> None:
         """Валидация бизнес-правил для новой книги."""
         self._validate_year(data.year)
